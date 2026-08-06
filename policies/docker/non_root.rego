@@ -1,7 +1,8 @@
-package main
+package docker
+
 deny[msg] {
-  input.kind == "Deployment"
-  c := input.spec.template.spec.containers[_]
-  not c.securityContext.runAsNonRoot
-  msg := sprintf("Container '%v' deve usar runAsNonRoot: true.", [c.name])
+  some i
+  input[i].Cmd == "USER"
+  input[i].Value == "root"
+  msg := "Container não deve rodar como root"
 }

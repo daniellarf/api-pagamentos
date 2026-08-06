@@ -1,0 +1,8 @@
+# Usa imagem aprovada com digest
+FROM gcr.io/distroless/base@sha256:1234567890abcdef
+
+# Define usuário não-root
+USER appuser
+
+# Exemplo de recurso com limites
+RUN echo "rodando com limites"

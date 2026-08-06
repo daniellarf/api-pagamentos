@@ -1,7 +1,15 @@
-package main
+package docker
+
 deny[msg] {
-  input.kind == "Deployment"
-  c := input.spec.template.spec.containers[_]
-  not c.resources.limits.memory
-  msg := sprintf("Container '%v' sem limite de memória.", [c.name])
+  some i
+  input[i].Cmd == "RESOURCE"
+  not input[i].Value["limits"]["cpu"]
+  msg := sprintf("Linha %d: container sem limite de CPU definido.", [i])
+}
+
+deny[msg] {
+  some i
+  input[i].Cmd == "RESOURCE"
+  not input[i].Value["limits"]["memory"]
+  msg := sprintf("Linha %d: container sem limite de memória definido.", [i])
 }

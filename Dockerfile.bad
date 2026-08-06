@@ -1,0 +1,9 @@
+# Usa imagem sem digest
+FROM node:20-alpine
+
+# Não define USER (vai disparar no_root/non_root)
+# USER root (vai disparar no_root/non_root)
+USER root
+
+# Sem limites de recursos (vai disparar resources)
+RUN echo "rodando sem limites"
