@@ -1,14 +1,14 @@
-package main
-import future.keywords.if
-import future.keywords.contains
+package docker
 
-deny[msg] if {
-  input[i].Cmd == "from"
-  image := input[i].Value[0]
-  not has_digest(image)
-  msg := sprintf("Linha %d: imagem base '%v' não possui digest.", [i, image])
-}
+deny contains msg if {
+    some i
+    input[i].Cmd == "from"
 
-has_digest(image) if {
-  contains(image, "@sha256:")
+    image := input[i].Value[0]
+    not contains(image, "@sha256:")
+
+    msg := sprintf(
+        "Linha %d: imagem base '%s' deve usar digest SHA256.",
+        [i + 1, image]
+    )
 }

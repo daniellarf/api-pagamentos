@@ -1,18 +1,25 @@
-package main
-import future.keywords.if
+package docker
 
-deny[msg] if {
-  input[i].Cmd == "user"
-  lower(input[i].Value[0]) == "root"
-  msg := sprintf("Linha %d: USER root não é permitido.", [i])
+deny contains msg if {
+    some i
+    input[i].Cmd == "user"
+
+    user := lower(input[i].Value[0])
+    user == "root"
+
+    msg := sprintf(
+        "Linha %d: USER root não é permitido.",
+        [i + 1]
+    )
 }
 
-deny[msg] if {
-  not has_user
-  msg := "Dockerfile sem instrução USER."
+deny contains msg if {
+    not has_user
+
+    msg := "Dockerfile sem instrução USER."
 }
 
 has_user if {
-  some i
-  input[i].Cmd == "user"
+    some i
+    input[i].Cmd == "user"
 }

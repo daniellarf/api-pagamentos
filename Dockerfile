@@ -1,20 +1,20 @@
-# Usa uma imagem base oficial do Node.js
-FROM node:18-alpine
+FROM node:20-alpine@sha256:abc
 
-# Define o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Copia os arquivos de dependências
 COPY package*.json ./
 
-# Instala as dependências
-RUN npm install
+RUN npm ci --omit=dev
 
-# Copia o restante do código
-COPY . .
+COPY server.js ./
 
-# Expõe a porta da aplicação
+LABEL org.opencontainers.image.licenses="MIT"
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://localhost:3000').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+
+USER node
+
 EXPOSE 3000
 
-# Comando de inicialização
 CMD ["npm", "start"]

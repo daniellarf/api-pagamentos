@@ -1,8 +1,20 @@
-# Usa imagem aprovada com digest
-FROM gcr.io/distroless/base@sha256:1234567890abcdef
+FROM node:20-alpine@sha256:SEU_DIGEST_REAL
 
-# Define usuário não-root
-USER appuser
+WORKDIR /app
 
-# Exemplo de recurso com limites
-RUN echo "rodando com limites"
+COPY package*.json ./
+
+RUN npm ci --omit=dev
+
+COPY server.js ./
+
+LABEL org.opencontainers.image.licenses="MIT"
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://localhost:3000').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+
+USER node
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

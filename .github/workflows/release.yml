@@ -11,6 +11,10 @@ permissions:
 jobs:
   build-sign-attest:
     runs-on: ubuntu-latest
+
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
     steps:
       - uses: actions/checkout@v4
 
