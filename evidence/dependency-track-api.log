@@ -1,0 +1,4 @@
+timestamp=2026-08-06T22:36:52.283Z
+endpoint=http://localhost:8081/api/v1/bom
+status=200
+response={"token":"mock-1786055812260","status":"accepted","mode":"mock"}

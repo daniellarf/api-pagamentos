@@ -1,0 +1,18 @@
+Componentes no SBOM: 77
+Componentes com licença analisada: 67
+Componentes sem licença identificada: 10
+Componentes fora da allowlist: 0
+
+Sem licença identificada:
+- actions/checkout@v4
+- actions/checkout@v4
+- actions/upload-artifact@v4
+- anchore/sbom-action@v0
+- aquasecurity/trivy-action@0.20.0
+- docker/build-push-action@v6
+- docker/login-action@v3
+- docker/setup-buildx-action@v3
+- sigstore/cosign-installer@v3
+- slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+
+Política de licenças aprovada.

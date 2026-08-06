@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-08-06T22:45:38.750Z",
+  "regoTestsPassed": 6,
+  "dockerBuildValidated": true,
+  "kubernetesPolicyValidated": true,
+  "sbomComponents": 77,
+  "componentsWithLicense": 67,
+  "dependencyTrackEvidence": true,
+  "cyclonedxEvidence": true
+}

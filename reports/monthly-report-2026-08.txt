@@ -1,0 +1,10 @@
+Relatório mensal de compliance — 2026-08
+Gerado em: 2026-08-06T22:45:38.750Z
+
+Testes Rego aprovados: 6
+Build Docker validado: sim
+Policy Kubernetes validada: sim
+Componentes no SBOM: 77
+Componentes com licença identificada: 67
+Evidência Dependency-Track: sim
+Evidência cyclonedx analyze: sim
