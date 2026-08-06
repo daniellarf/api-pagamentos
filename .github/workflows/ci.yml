@@ -1,0 +1,90 @@
+name: CI Security Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  security-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Conftest
+        run: |
+          curl -L https://github.com/open-policy-agent/conftest/releases/download/v0.69.0/conftest_0.69.0_Linux_x86_64.tar.gz -o conftest.tar.gz
+          tar xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/
+
+      - name: Run Policy Checks
+        run: |
+          conftest test Dockerfile --policy policies/docker
+          conftest test k8s/deployment.yaml --policy policies/kubernetes
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b .
+
+      - name: Generate SBOM
+        run: |
+          ./syft . -o cyclonedx-json > sbom/sbom-cyclonedx.json
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b .
+
+      - name: Analyze SBOM
+        run: |
+          ./trivy sbom sbom/sbom-cyclonedx.json
+
+      - name: Build Docker Image
+        run: |
+          docker build -t myapp:1.0 .
+
+      - name: Install Cosign
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sh -s -- -b .
+
+      - name: Write Cosign Keys from Secrets
+        run: |
+          echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+          echo "${{ secrets.COSIGN_PUB }}" > cosign.pub
+
+      - name: Sign Docker Image
+        run: |
+          ./cosign sign --key cosign.key myapp:1.0
+
+      - name: Verify Docker Image
+        run: |
+          ./cosign verify --key cosign.pub myapp:1.0
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0 .
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0
+
+      - name: Install Cosign
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sh -s -- -b .
+
+      - name: Write Cosign Keys from Secrets
+        run: |
+          echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+          echo "${{ secrets.COSIGN_PUB }}" > cosign.pub
+
+      - name: Sign Docker Image
+        run: |
+          ./cosign sign --key cosign.key ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0
+
+      - name: Verify Docker Image
+        run: |
+          ./cosign verify --key cosign.pub ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0
