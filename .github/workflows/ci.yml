@@ -40,38 +40,18 @@ jobs:
         run: |
           ./trivy sbom sbom/sbom-cyclonedx.json
 
-      - name: Build Docker Image
-        run: |
-          docker build -t myapp:1.0 .
-
-      - name: Install Cosign
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sh -s -- -b .
-
-      - name: Write Cosign Keys from Secrets
-        run: |
-          echo "${{ secrets.COSIGN_KEY }}" > cosign.key
-          echo "${{ secrets.COSIGN_PUB }}" > cosign.pub
-
-      - name: Sign Docker Image
-        run: |
-          ./cosign sign --key cosign.key myapp:1.0
-
-      - name: Verify Docker Image
-        run: |
-          ./cosign verify --key cosign.pub myapp:1.0
-
       - name: Login to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0 .
-
-      - name: Push Docker Image
-        run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0
 
       - name: Install Cosign
         run: |
@@ -89,3 +69,4 @@ jobs:
       - name: Verify Docker Image
         run: |
           ./cosign verify --key cosign.pub ${{ secrets.DOCKERHUB_USERNAME }}/myapp:1.0
+
