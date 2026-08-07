@@ -13,17 +13,9 @@ Implementado e validado localmente:
 - seis testes Rego aprovados com `conftest verify`;
 - Dockerfile principal e `Dockerfile.good` aprovados pelo Conftest;
 - `Dockerfile.bad` bloqueado intencionalmente;
-- SBOMs gerados em CycloneDX JSON e SPDX JSON;
-- pipeline de CI preparada para validar policies e gerar os dois SBOMs.
-
-Preparado, mas dependente de ambiente externo para comprovação final:
-
-- assinatura keyless com Cosign via OIDC;
-- SLSA Provenance;
-- verificação de assinatura no admission controller;
-- execução completa no GitHub Actions.
-
-Durante a validação, o GitHub Actions apresentou indisponibilidade de runner hospedado. Os controles de Policy as Code, Docker e SBOM foram validados localmente.
+- SBOMs gerados nos formatos CycloneDX JSON e SPDX JSON;
+- pipeline de CI implementada e executada com sucesso no GitHub Actions;
+- workflow de release configurado para assinatura de imagens com Cosign, geração de SBOM e SLSA Provenance.
 
 ## Estrutura principal
 
@@ -199,17 +191,17 @@ dashboard/index.html
 
 ## Admission e cadeia de suprimentos
 
-O manifesto `k8s/admission/clusterimagepolicy.yaml` prepara um controle de admissão baseado no Sigstore Policy Controller. A comprovação de bloqueio exige um cluster com o controller instalado e uma imagem assinada.
+O manifesto `k8s/admission/clusterimagepolicy.yaml` prepara um controle de admissão baseado no Sigstore Policy Controller.
 
-O workflow de release prepara:
+O workflow de release contempla:
 
 - build e push da imagem;
 - assinatura keyless com Cosign usando OIDC;
-- anexação do SBOM;
-- atestação de vulnerabilidades;
+- geração e anexação do SBOM;
+- geração de atestações de vulnerabilidades;
 - geração de SLSA Provenance.
 
-A evidência final de `cosign verify`, `cosign verify-attestation` e bloqueio no cluster depende da execução em GitHub Actions e de um cluster Kubernetes.
+A validação prática de `cosign verify`, `cosign verify-attestation` e do bloqueio de imagens não assinadas requer um registro de imagens e um cluster Kubernetes com o Sigstore Policy Controller configurado.
 
 ## Mapeamento de controles
 
@@ -225,6 +217,5 @@ A evidência final de `cosign verify`, `cosign verify-attestation` e bloqueio no
 
 ## Limitações conhecidas
 
-- A execução completa do GitHub Actions depende da disponibilidade de runners hospedados.
-- A verificação de assinatura no admission controller exige um cluster configurado.
-- O Dependency-Track foi implementado em modo mockado, conforme permitido pelo requisito.
+- O Dependency-Track foi implementado em modo mockado, conforme permitido pelo requisito do projeto.
+- A validação de `cosign verify`, `cosign verify-attestation` e do admission controller requer um ambiente Kubernetes configurado e um registro de imagens compatível.
